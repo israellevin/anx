@@ -5,8 +5,6 @@ import logging
 
 import requests
 
-import db
-
 LOGGER = logging.getLogger('anx.conversation')
 
 
@@ -63,16 +61,6 @@ class Session:
             instance.current_line = None
 
 
-def get_lines_from_db():
-    'Read the bot lines from the database.'
-    with db.sql_connection() as sql:
-        sql.execute('SELECT name, bot_text, defines FROM bot_lines')
-        lines = sql.fetchall()
-        sql.execute('SELECT source, target, answer FROM flows')
-        flows = sql.fetchall()
-    return lines, flows
-
-
 def get_lines_from_editor():
     'Currently hard-coded - soon to be from a google sheet.'
     lines, flows = [list(reader) for reader in [csv.reader(io.StringIO(requests.get(
@@ -121,12 +109,3 @@ def update_lines():
     lines_list, flows_list = get_lines_from_editor()
     Session.lines = combine_lines_and_flows(lines_list, flows_list)
     Session.reset_sessions()
-    with db.sql_connection() as sql:
-        sql.execute('DELETE FROM flows')
-        sql.execute('DELETE FROM bot_lines')
-        sql.executemany("""
-            INSERT INTO bot_lines(name, bot_text, defines) VALUES(%(name)s, %(bot_text)s, %(defines)s)
-        """, lines_list)
-        sql.executemany("""
-            INSERT INTO flows(source, target, answer) VALUES(%(source)s, %(target)s, %(answer)s)
-        """, flows_list)
