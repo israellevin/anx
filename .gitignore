@@ -1,0 +1,9 @@
+*$py.class
+*.egg-info
+*.log
+*.py[cod]
+.coverage
+.eggs
+__pycache__/
+anx.env
+venv
