@@ -77,6 +77,9 @@ def combine_lines_and_flows(lines, flows):
     'Combine bot lines and flows into a convenient dict while validating the data.'
     lines = {line['name']: dict(line, flow={}) for line in lines}
     for flow in flows:
+        for item_type in ['target', 'source']:
+            if flow[item_type] not in lines:
+                raise InvalidFlow(f"did not find required {item_type} line: {flow[item_type]}")
         lines[flow['source']]['flow'][flow['answer']] = flow['target']
     children = set()
     for line in lines.values():
